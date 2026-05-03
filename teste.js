@@ -1,1 +1,1 @@
-console.log('teste')
+console.log('iniciando estudos 2026')
