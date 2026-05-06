@@ -1,4 +1,4 @@
-FROM python:3.13
+FROM python:3.12.2
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # deps de dev
 COPY pyproject.toml .
-RUN pip install --no-cache-dir .[dev]  && pip show ruff
+RUN pip install --no-cache-dir .[dev]
 
 
 COPY app/ .
