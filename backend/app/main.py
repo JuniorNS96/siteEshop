@@ -1,14 +1,49 @@
+from http import HTTPStatus
+
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 
-app = FastAPI()
+from app.schemas.produtos import produto_response
+from app.schemas.usuario import UserDB, UserPublic, UserSchema
+
+app = FastAPI(
+    title='Minha API de estudos',
+    description='API de estudos para FastAPI',
+    version='1.0.0',
+)
+
+meu_banco = []
 
 
-@app.get('/')
+@app.get('/', status_code=HTTPStatus.OK)
 def home():
     return {'msg': 'Olá, Mundo!'}
 
 
-@app.get('/produtos')
+@app.get(
+    '/boas_vindas',
+    status_code=HTTPStatus.OK,
+    response_class=HTMLResponse,
+)
+def boas_vindas():
+    return """
+    <html>
+        <head>
+            <title>Minha API</title>
+        </head>
+        <body>
+            <h1>Bem-vindo à minha API!</h1>
+            <p>Esta é a página inicial da minha API.</p>
+        </body>
+    </html>
+    """
+
+
+@app.get(
+    '/produtos',
+    status_code=HTTPStatus.OK,
+    response_model=list[produto_response],
+)
 def produtos():
     return [
         {
@@ -38,10 +73,12 @@ def produtos():
     ]
 
 
-@app.get('/categorias')
-def categorias():
-    return [
-        {'id': 1, 'nome': 'Categoria 1'},
-        {'id': 2, 'nome': 'Categoria 2'},
-        {'id': 3, 'nome': 'Categoria 3'},
-    ]
+@app.post(
+    '/usuarios/',
+    status_code=HTTPStatus.CREATED,
+    response_model=UserPublic,
+)
+def create_usuario(user: UserSchema):
+    user_with_id = UserDB(**user.model_dump(), id=len(meu_banco) + 1)
+    meu_banco.append(user_with_id)
+    return user_with_id
