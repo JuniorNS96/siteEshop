@@ -1,13 +1,18 @@
 from http import HTTPStatus
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
 from app.schemas.produtos import produto_response
-from app.schemas.usuario import UserDB, UserPublic, UserSchema
+from app.schemas.usuario import (
+    UserDB,
+    UserList,
+    UserPublic,
+    UserSchema,
+)
 
 app = FastAPI(
-    title='Minha API de estudos',
+    title='BIG API de estudos',
     description='API de estudos para FastAPI',
     version='1.0.0',
 )
@@ -82,3 +87,57 @@ def create_usuario(user: UserSchema):
     user_with_id = UserDB(**user.model_dump(), id=len(meu_banco) + 1)
     meu_banco.append(user_with_id)
     return user_with_id
+
+
+@app.get(
+    '/usuarios/',
+    status_code=HTTPStatus.OK,
+    response_model=UserList,
+)
+def read_usuarios():
+    return {'users': meu_banco}
+
+
+@app.put(
+    '/usuarios/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=UserPublic,
+)
+def update_usuario(user_id: int, user: UserSchema):
+    if user_id < 1 or user_id > len(meu_banco):
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado'
+        )
+    user_with_id = UserDB(**user.model_dump(), id=user_id)
+    meu_banco[user_id - 1] = user_with_id
+    return user_with_id
+
+
+@app.delete(
+    '/usuarios/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=UserPublic,
+)
+def delete_usuario(user_id: int):
+    if user_id < 1 or user_id > len(meu_banco):
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado'
+        )
+    deleted_user = meu_banco.pop(user_id - 1)
+    return deleted_user
+
+
+@app.get(
+    '/usuarios/{user_id}',
+    # summary='aaaaa',
+    # description='bbbbb',
+    # response_description='ccccc',
+    status_code=HTTPStatus.OK,
+    response_model=UserPublic,
+)
+def read_usuario(user_id: int):
+
+    usuario = next((u for u in meu_banco if u.id == user_id), None)
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return usuario

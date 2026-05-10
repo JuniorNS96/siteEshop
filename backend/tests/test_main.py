@@ -11,6 +11,29 @@ def client():
     return TestClient(app)
 
 
+def test_boas_vindas_api_is_working(client):
+    response = client.get('/boas_vindas')
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_boas_vindas_msg_home(client):
+    response = client.get('/boas_vindas')
+    assert (
+        response.text
+        == """
+    <html>
+        <head>
+            <title>Minha API</title>
+        </head>
+        <body>
+            <h1>Bem-vindo à minha API!</h1>
+            <p>Esta é a página inicial da minha API.</p>
+        </body>
+    </html>
+    """
+    )
+
+
 def test_home_api_is_working(client):
     response = client.get('/')
     assert response.status_code == HTTPStatus.OK
